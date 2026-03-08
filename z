@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_NAME="勤💩皇工具箱"
+APP_CMD="z"
+APP_VER="0.1.0"
+
+C_RESET='\033[0m'; C_CYAN='\033[96m'; C_GREEN='\033[32m'; C_YELLOW='\033[33m'; C_RED='\033[31m'
+
+pause(){ read -r -p "按回车继续..." _; }
+
+have_cmd(){ command -v "$1" >/dev/null 2>&1; }
+
+os_family(){
+  if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    case "${ID_LIKE:-$ID}" in
+      *debian*|*ubuntu*) echo debian ;;
+      *rhel*|*fedora*|*centos*|*rocky*|*almalinux*) echo rhel ;;
+      *) echo unknown ;;
+    esac
+  else
+    echo unknown
+  fi
+}
+
+pm_update(){
+  case "$(os_family)" in
+    debian) sudo apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y ;;
+    rhel) if have_cmd dnf; then sudo dnf -y upgrade; else sudo yum -y update; fi ;;
+    *) echo -e "${C_RED}不支持的系统${C_RESET}"; return 1 ;;
+  esac
+}
+
+show_system_info(){
+  echo -e "${C_CYAN}===== 系统信息 =====${C_RESET}"
+  echo "主机名: $(hostname)"
+  echo "内核: $(uname -r)"
+  if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    echo "系统: ${PRETTY_NAME:-$ID}"
+  fi
+  echo "架构: $(uname -m)"
+  echo "在线时长: $(uptime -p || true)"
+  echo "CPU: $(lscpu 2>/dev/null | awk -F: '/Model name/{gsub(/^ +/,"",$2);print $2; exit}' || echo N/A)"
+  echo "内存: $(free -h | awk '/Mem:/{print $3"/"$2}')"
+  echo "磁盘:"
+  df -hT | sed -n '1,8p'
+  echo
+  if have_cmd curl; then
+    echo "公网IP: $(curl -s --max-time 3 https://api.ipify.org || echo N/A)"
+  fi
+}
+
+ensure_docker(){
+  if have_cmd docker; then
+    echo -e "${C_GREEN}Docker 已安装${C_RESET}"; return 0
+  fi
+  echo -e "${C_YELLOW}未检测到 Docker，开始安装...${C_RESET}"
+  case "$(os_family)" in
+    debian)
+      sudo apt-get update -y
+      sudo apt-get install -y ca-certificates curl gnupg
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+$(. /etc/os-release; echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+      sudo apt-get update -y
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      ;;
+    rhel)
+      if have_cmd dnf; then
+        sudo dnf -y install dnf-plugins-core
+        sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo || true
+        sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      else
+        sudo yum -y install yum-utils
+        sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo || true
+        sudo yum -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      fi
+      ;;
+    *) echo -e "${C_RED}不支持的系统${C_RESET}"; return 1 ;;
+  esac
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker "$USER" || true
+  echo -e "${C_GREEN}Docker 安装完成（重新登录后可免 sudo）${C_RESET}"
+}
+
+docker_status(){
+  if ! have_cmd docker; then echo "Docker 未安装"; return; fi
+  echo "Docker: $(docker -v)"
+  docker compose version || true
+  echo
+  echo "容器数量: $(docker ps -a -q 2>/dev/null | wc -l)"
+  echo "镜像数量: $(docker images -q 2>/dev/null | wc -l)"
+  echo "网络数量: $(docker network ls -q 2>/dev/null | wc -l)"
+  echo "卷数量: $(docker volume ls -q 2>/dev/null | wc -l)"
+  echo
+  docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+}
+
+docker_menu(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}${APP_NAME} - Docker管理${C_RESET}"
+    echo "1) 安装/更新 Docker"
+    echo "2) 查看 Docker 全局状态"
+    echo "3) 列出容器"
+    echo "4) 查看容器日志"
+    echo "5) 重启容器"
+    echo "6) 启停容器"
+    echo "0) 返回主菜单"
+    read -r -p "请选择: " c
+    case "$c" in
+      1) ensure_docker; pause ;;
+      2) docker_status; pause ;;
+      3) docker ps -a; pause ;;
+      4) read -r -p "容器名: " n; docker logs --tail 200 "$n"; pause ;;
+      5) read -r -p "容器名: " n; docker restart "$n"; pause ;;
+      6) read -r -p "容器名: " n; read -r -p "start/stop: " a; docker "$a" "$n"; pause ;;
+      0) break ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
+main(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}╔══════════════════════════════════════╗${C_RESET}"
+    echo -e "${C_CYAN}║  ${APP_NAME} v${APP_VER} (${APP_CMD})${C_CYAN}            ║${C_RESET}"
+    echo -e "${C_CYAN}╚══════════════════════════════════════╝${C_RESET}"
+    echo "1) 系统信息查询"
+    echo "2) 系统更新"
+    echo "6) Docker管理"
+    echo "0) 退出"
+    read -r -p "请输入你的选择: " choice
+    case "$choice" in
+      1) show_system_info; pause ;;
+      2) pm_update; pause ;;
+      6) docker_menu ;;
+      0) exit 0 ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
+main "$@"
