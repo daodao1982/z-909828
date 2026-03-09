@@ -238,24 +238,60 @@ ensure_nginx_market(){
   fi
 }
 
+run_k_app(){
+  local app_id="$1"
+  if have_cmd k; then
+    k app "$app_id"
+    return
+  fi
+
+  echo -e "${C_YELLOW}未检测到 k，尝试临时拉取并执行...${C_RESET}"
+  local ktmp
+  ktmp="$(mktemp)"
+  if ! curl -fsSL https://kejilion.sh -o "$ktmp"; then
+    echo -e "${C_RED}拉取失败，请先安装 k 再重试${C_RESET}"
+    rm -f "$ktmp"
+    return 1
+  fi
+  chmod +x "$ktmp"
+  bash "$ktmp" app "$app_id"
+  rm -f "$ktmp"
+}
+
 app_market_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - 应用市场${C_RESET}"
-    echo "21) 仅安装 Nginx"
-    echo "22) 站点重定向"
-    echo "23) 反向代理-IP+端口"
-    echo "24) 反向代理-域名"
+    echo "1) 宝塔面板官方版"
+    echo "2) aaPanel 宝塔国际版"
+    echo "3) 1Panel 新一代管理面板"
+    echo "4) 青龙面板定时任务管理平台"
+    echo "5) 简单图床图片管理程序"
+    echo "6) emby 多媒体管理系统"
+    echo "7) Lucky 大内网穿透工具"
+    echo "8) ClawdBot/Moltbot 机器人"
+    echo "9) 仅安装 Nginx"
+    echo "10) 站点重定向"
+    echo "11) 反向代理-IP+端口"
+    echo "12) 反向代理-域名"
     echo "0) 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
-      21)
+      1) run_k_app 1; pause ;;
+      2) run_k_app 2; pause ;;
+      3) run_k_app 3; pause ;;
+      4) run_k_app 12; pause ;;
+      5) run_k_app 14; pause ;;
+      6) run_k_app 15; pause ;;
+      7) run_k_app 112; pause ;;
+      8) run_k_app 114; pause ;;
+      9)
         ensure_nginx_market
         echo -e "${C_GREEN}Nginx 安装/启动完成${C_RESET}"
         pause
         ;;
-      22)
+      10)
         ensure_nginx_market
         read -r -p "请输入访问域名(如 a.com): " yuming
         read -r -p "请输入跳转域名(如 https://b.com): " target
@@ -270,7 +306,7 @@ EOF
         echo -e "${C_GREEN}站点重定向已生效${C_RESET}"
         pause
         ;;
-      23)
+      11)
         ensure_nginx_market
         read -r -p "请输入访问域名(如 a.com): " yuming
         read -r -p "请输入反代目标(如 127.0.0.1:8080): " upstream
@@ -290,7 +326,7 @@ EOF
         echo -e "${C_GREEN}反向代理(IP+端口)已生效${C_RESET}"
         pause
         ;;
-      24)
+      12)
         ensure_nginx_market
         read -r -p "请输入访问域名(如 a.com): " yuming
         read -r -p "请输入反代域名(如 https://google.com): " fandai_yuming
@@ -528,7 +564,7 @@ main(){
     echo "4) 基础工具（前18项）"
     echo "6) Docker管理"
     echo "8) 测试脚本合集"
-    echo "11) 应用市场"
+    echo "11) 应用市场（含 1/2/3/12/14/15/112/114）"
     echo "13) 系统工具"
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
