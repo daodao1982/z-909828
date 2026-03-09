@@ -11,6 +11,40 @@ pause(){ read -r -p "按回车继续..." _; }
 
 have_cmd(){ command -v "$1" >/dev/null 2>&1; }
 
+install_local(){
+  echo -e "${C_YELLOW}开始安装到本机（/usr/local/bin/z）...${C_RESET}"
+  local tmp
+  tmp="$(mktemp)"
+
+  if ! curl -fsSL "https://z.dfgr.eu.org/u?ts=$(date +%s)" -o "$tmp"; then
+    echo -e "${C_RED}下载失败，请检查网络后重试${C_RESET}"
+    rm -f "$tmp"
+    return 1
+  fi
+
+  if [[ "$EUID" -eq 0 ]]; then
+    install -m 0755 "$tmp" /usr/local/bin/z
+  else
+    sudo install -m 0755 "$tmp" /usr/local/bin/z
+  fi
+
+  rm -f "$tmp"
+  echo -e "${C_GREEN}✅ 安装完成：现在可直接输入 z 启动${C_RESET}"
+}
+
+first_run_install_prompt(){
+  # 若系统里还没有可执行命令 z，则在首次执行时提示安装
+  if ! command -v z >/dev/null 2>&1; then
+    echo -e "${C_YELLOW}检测到你还未安装命令 z。${C_RESET}"
+    read -r -p "是否现在安装到 /usr/local/bin/z？[Y/n]: " ans
+    case "${ans:-Y}" in
+      n|N) ;;
+      *) install_local || true ;;
+    esac
+    pause
+  fi
+}
+
 update_script(){
   echo -e "${C_YELLOW}开始更新脚本...${C_RESET}"
   local tmp
@@ -152,6 +186,7 @@ main(){
     echo -e "${C_CYAN}╔══════════════════════════════════════╗${C_RESET}"
     echo -e "${C_CYAN}║  ${APP_NAME} v${APP_VER} (${APP_CMD})${C_CYAN}            ║${C_RESET}"
     echo -e "${C_CYAN}╚══════════════════════════════════════╝${C_RESET}"
+    echo "99) 安装到本机（z 命令）"
     echo "00) 脚本更新"
     echo "1) 系统信息查询"
     echo "2) 系统更新"
@@ -159,6 +194,7 @@ main(){
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
+      99) install_local; pause ;;
       00) update_script; pause ;;
       1) show_system_info; pause ;;
       2) pm_update; pause ;;
@@ -169,4 +205,5 @@ main(){
   done
 }
 
+first_run_install_prompt
 main "$@"
