@@ -72,6 +72,94 @@ show_system_info(){
   fi
 }
 
+install_pkgs(){
+  case "$(os_family)" in
+    debian)
+      sudo apt-get update -y
+      sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+      ;;
+    rhel)
+      if have_cmd dnf; then
+        sudo dnf -y install "$@"
+      else
+        sudo yum -y install "$@"
+      fi
+      ;;
+    *)
+      echo -e "${C_RED}不支持的系统${C_RESET}"
+      return 1
+      ;;
+  esac
+}
+
+tools_status_line(){
+  local n="$1"
+  if have_cmd "$n"; then
+    printf "✅ %-12s 已安装" "$n"
+  else
+    printf "❌ %-12s 未安装" "$n"
+  fi
+}
+
+basic_tools_menu(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}${APP_NAME} - 基础工具${C_RESET}"
+    echo "------------------------"
+    tools=(curl wget sudo socat htop iftop unzip tar tmux ffmpeg btop ranger ncdu fzf vim nano git opencode)
+
+    for ((i=0; i<${#tools[@]}; i+=2)); do
+      left="$(tools_status_line "${tools[i]}")"
+      if [[ -n "${tools[i+1]:-}" ]]; then
+        right="$(tools_status_line "${tools[i+1]}")"
+        printf "%-42s %s\n" "$left" "$right"
+      else
+        printf "%s\n" "$left"
+      fi
+    done
+
+    echo "------------------------"
+    echo "1) curl               2) wget"
+    echo "3) sudo               4) socat"
+    echo "5) htop               6) iftop"
+    echo "7) unzip              8) tar"
+    echo "9) tmux              10) ffmpeg"
+    echo "11) btop             12) ranger"
+    echo "13) ncdu             14) fzf"
+    echo "15) vim              16) nano"
+    echo "17) git              18) opencode"
+    echo "0) 返回主菜单"
+    read -r -p "请选择: " c
+
+    case "$c" in
+      1) install_pkgs curl; pause ;;
+      2) install_pkgs wget; pause ;;
+      3) install_pkgs sudo; pause ;;
+      4) install_pkgs socat; pause ;;
+      5) install_pkgs htop; htop || true; pause ;;
+      6) install_pkgs iftop; echo "运行 iftop 需 root 权限，可手动执行: sudo iftop"; pause ;;
+      7) install_pkgs unzip; unzip -v | head -n 2; pause ;;
+      8) install_pkgs tar; tar --version | head -n 1; pause ;;
+      9) install_pkgs tmux; tmux -V; pause ;;
+      10) install_pkgs ffmpeg; ffmpeg -version | head -n 1; pause ;;
+      11) install_pkgs btop; btop || true; pause ;;
+      12) install_pkgs ranger; echo "已安装 ranger"; pause ;;
+      13) install_pkgs ncdu; echo "已安装 ncdu"; pause ;;
+      14) install_pkgs fzf; echo "已安装 fzf"; pause ;;
+      15) install_pkgs vim; vim --version | head -n 1; pause ;;
+      16) install_pkgs nano; nano --version | head -n 1; pause ;;
+      17) install_pkgs git; git --version; pause ;;
+      18)
+        curl -fsSL https://opencode.ai/install | bash
+        echo "opencode 安装命令已执行"
+        pause
+        ;;
+      0) break ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
 ensure_docker(){
   if have_cmd docker; then
     echo -e "${C_GREEN}Docker 已安装${C_RESET}"; return 0
@@ -155,6 +243,7 @@ main(){
     echo "00) 脚本更新"
     echo "1) 系统信息查询"
     echo "2) 系统更新"
+    echo "4) 基础工具（前18项）"
     echo "6) Docker管理"
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
@@ -162,6 +251,7 @@ main(){
       00) update_script; pause ;;
       1) show_system_info; pause ;;
       2) pm_update; pause ;;
+      4) basic_tools_menu ;;
       6) docker_menu ;;
       0) exit 0 ;;
       *) echo "无效输入"; pause ;;
