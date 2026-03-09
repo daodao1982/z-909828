@@ -322,13 +322,7 @@ openclaw_manage_menu(){
       5) openclaw logs; pause ;;
       6)
         read -r -p "⚠️ 确认卸载 OpenClaw？(y/n): " c1
-        if [[ "$c1" != "y" && "$c1" != "Y" ]]; then
-          echo "已取消卸载"
-          pause
-          continue
-        fi
-        read -r -p "最后确认，确定卸载？(y/n): " c2
-        if [[ "$c2" == "y" || "$c2" == "Y" ]]; then
+        if [[ "$c1" == "y" || "$c1" == "Y" ]]; then
           if [[ "${EUID}" -eq 0 ]]; then
             npm uninstall -g openclaw
           else
