@@ -225,6 +225,97 @@ test_scripts_menu(){
   done
 }
 
+ensure_nginx_market(){
+  ensure_docker
+  sudo mkdir -p /home/web/conf.d /home/web/html
+  if ! docker ps -a --format '{{.Names}}' | grep -qx nginx; then
+    docker run -d --name nginx --restart always -p 80:80 \
+      -v /home/web/conf.d:/etc/nginx/conf.d \
+      -v /home/web/html:/usr/share/nginx/html \
+      nginx:alpine
+  else
+    docker start nginx >/dev/null 2>&1 || true
+  fi
+}
+
+app_market_menu(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}${APP_NAME} - 应用市场${C_RESET}"
+    echo "21) 仅安装 Nginx"
+    echo "22) 站点重定向"
+    echo "23) 反向代理-IP+端口"
+    echo "24) 反向代理-域名"
+    echo "0) 返回主菜单"
+    read -r -p "请选择: " c
+
+    case "$c" in
+      21)
+        ensure_nginx_market
+        echo -e "${C_GREEN}Nginx 安装/启动完成${C_RESET}"
+        pause
+        ;;
+      22)
+        ensure_nginx_market
+        read -r -p "请输入访问域名(如 a.com): " yuming
+        read -r -p "请输入跳转域名(如 https://b.com): " target
+        sudo tee /home/web/conf.d/${yuming}.conf >/dev/null <<EOF
+server {
+  listen 80;
+  server_name ${yuming};
+  return 301 ${target}\$request_uri;
+}
+EOF
+        docker exec nginx nginx -s reload
+        echo -e "${C_GREEN}站点重定向已生效${C_RESET}"
+        pause
+        ;;
+      23)
+        ensure_nginx_market
+        read -r -p "请输入访问域名(如 a.com): " yuming
+        read -r -p "请输入反代目标(如 127.0.0.1:8080): " upstream
+        sudo tee /home/web/conf.d/${yuming}.conf >/dev/null <<EOF
+server {
+  listen 80;
+  server_name ${yuming};
+  location / {
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass http://${upstream};
+  }
+}
+EOF
+        docker exec nginx nginx -s reload
+        echo -e "${C_GREEN}反向代理(IP+端口)已生效${C_RESET}"
+        pause
+        ;;
+      24)
+        ensure_nginx_market
+        read -r -p "请输入访问域名(如 a.com): " yuming
+        read -r -p "请输入反代域名(如 https://google.com): " fandai_yuming
+        sudo tee /home/web/conf.d/${yuming}.conf >/dev/null <<EOF
+server {
+  listen 80;
+  server_name ${yuming};
+  location / {
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_pass ${fandai_yuming};
+  }
+}
+EOF
+        docker exec nginx nginx -s reload
+        echo -e "${C_GREEN}反向代理(域名)已生效${C_RESET}"
+        pause
+        ;;
+      0) break ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
 ensure_docker(){
   if have_cmd docker; then
     echo -e "${C_GREEN}Docker 已安装${C_RESET}"; return 0
@@ -311,6 +402,7 @@ main(){
     echo "4) 基础工具（前18项）"
     echo "6) Docker管理"
     echo "8) 测试脚本合集"
+    echo "11) 应用市场"
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
@@ -320,6 +412,7 @@ main(){
       4) basic_tools_menu ;;
       6) docker_menu ;;
       8) test_scripts_menu ;;
+      11) app_market_menu ;;
       0) exit 0 ;;
       *) echo "无效输入"; pause ;;
     esac
