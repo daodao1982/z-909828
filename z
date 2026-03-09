@@ -160,6 +160,71 @@ basic_tools_menu(){
   done
 }
 
+test_scripts_menu(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}${APP_NAME} - 测试脚本合集${C_RESET}"
+    echo "------------------------"
+    echo "IP及解锁状态检测"
+    echo "1) ChatGPT 解锁状态检测"
+    echo "2) Region 流媒体解锁测试"
+    echo "3) yeahwu 流媒体解锁检测"
+    echo "4) xykt IP质量体检脚本"
+    echo "------------------------"
+    echo "网络线路测速"
+    echo "11) besttrace 三网回程延迟路由测试"
+    echo "12) mtr_trace 三网回程线路测试"
+    echo "13) Superspeed 三网测速"
+    echo "14) nxtrace 快速回程测试脚本"
+    echo "15) nxtrace 指定IP回程测试"
+    echo "16) ludashi2020 三网线路测试"
+    echo "17) i-abc 多功能测速脚本"
+    echo "18) NetQuality 网络质量体检脚本"
+    echo "------------------------"
+    echo "硬件性能测试"
+    echo "21) yabs 性能测试"
+    echo "22) icu/gb5 CPU性能测试脚本"
+    echo "------------------------"
+    echo "综合性测试"
+    echo "31) bench 性能测试"
+    echo "32) spiritysdx 融合怪测评"
+    echo "33) nodequality 融合怪测评"
+    echo "------------------------"
+    echo "0) 返回主菜单"
+    read -r -p "请选择: " c
+
+    case "$c" in
+      1) bash <(curl -Ls https://cdn.jsdelivr.net/gh/missuo/OpenAI-Checker/openai.sh); pause ;;
+      2) bash <(curl -L -s check.unlock.media); pause ;;
+      3) install_pkgs wget; wget -qO- https://github.com/yeahwu/check/raw/main/check.sh | bash; pause ;;
+      4) bash <(curl -Ls IP.Check.Place); pause ;;
+      11) install_pkgs wget; wget -qO- git.io/besttrace | bash; pause ;;
+      12) curl -fsSL https://raw.githubusercontent.com/zhucaidan/mtr_trace/main/mtr_trace.sh | bash; pause ;;
+      13) bash <(curl -Lso- https://git.io/superspeed_uxh); pause ;;
+      14) curl -fsSL nxtrace.org/nt | bash; nexttrace --fast-trace --tcp || true; pause ;;
+      15)
+        echo "北京电信: 219.141.136.12 | 北京联通: 202.106.50.1 | 北京移动: 221.179.155.161"
+        echo "上海电信: 202.96.209.133 | 上海联通: 210.22.97.1 | 上海移动: 211.136.112.200"
+        echo "广州电信: 58.60.188.222 | 广州联通: 210.21.196.6 | 广州移动: 120.196.165.24"
+        read -r -p "输入指定IP: " testip
+        curl -fsSL nxtrace.org/nt | bash
+        nexttrace "$testip" || true
+        pause
+        ;;
+      16) curl -fsSL https://raw.githubusercontent.com/ludashi2020/backtrace/main/install.sh | sh; pause ;;
+      17) bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh); pause ;;
+      18) bash <(curl -sL Net.Check.Place); pause ;;
+      21) curl -sL yabs.sh | bash -s -- -i -5; pause ;;
+      22) bash <(curl -sL bash.icu/gb5); pause ;;
+      31) curl -Lso- bench.sh | bash; pause ;;
+      32) curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o /tmp/ecs.sh && bash /tmp/ecs.sh; pause ;;
+      33) bash <(curl -sL https://run.NodeQuality.com); pause ;;
+      0) break ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
 ensure_docker(){
   if have_cmd docker; then
     echo -e "${C_GREEN}Docker 已安装${C_RESET}"; return 0
@@ -245,6 +310,7 @@ main(){
     echo "2) 系统更新"
     echo "4) 基础工具（前18项）"
     echo "6) Docker管理"
+    echo "8) 测试脚本合集"
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
@@ -253,6 +319,7 @@ main(){
       2) pm_update; pause ;;
       4) basic_tools_menu ;;
       6) docker_menu ;;
+      8) test_scripts_menu ;;
       0) exit 0 ;;
       *) echo "无效输入"; pause ;;
     esac
