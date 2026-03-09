@@ -327,16 +327,7 @@ app_market_menu(){
       5) run_k_app 14; pause ;;
       6) run_k_app 15; pause ;;
       7) run_k_app 112; pause ;;
-      8)
-        echo "1) 一键安装 OpenClaw"
-        echo "2) 打开 OpenClaw 管理菜单(k app 114)"
-        read -r -p "请选择: " oc
-        case "$oc" in
-          1) install_openclaw_quick; pause ;;
-          2) run_k_app 114; pause ;;
-          *) echo "无效输入"; pause ;;
-        esac
-        ;;
+      8) run_k_app 114; pause ;;
       9)
         ensure_nginx_market
         echo -e "${C_GREEN}Nginx 安装/启动完成${C_RESET}"
