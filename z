@@ -321,14 +321,14 @@ openclaw_manage_menu(){
       4) openclaw status; openclaw gateway status; pause ;;
       5) openclaw logs; pause ;;
       6)
-        read -r -p "⚠️ 确认卸载 OpenClaw？输入 YES 继续: " c1
-        if [[ "$c1" != "YES" ]]; then
+        read -r -p "⚠️ 确认卸载 OpenClaw？(y/n): " c1
+        if [[ "$c1" != "y" && "$c1" != "Y" ]]; then
           echo "已取消卸载"
           pause
           continue
         fi
-        read -r -p "最后确认：输入 UNINSTALL 执行卸载: " c2
-        if [[ "$c2" == "UNINSTALL" ]]; then
+        read -r -p "最后确认，确定卸载？(y/n): " c2
+        if [[ "$c2" == "y" || "$c2" == "Y" ]]; then
           if [[ "${EUID}" -eq 0 ]]; then
             npm uninstall -g openclaw
           else
