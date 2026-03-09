@@ -258,6 +258,48 @@ run_k_app(){
   rm -f "$ktmp"
 }
 
+install_openclaw_quick(){
+  echo -e "${C_YELLOW}开始一键安装 OpenClaw...${C_RESET}"
+
+  if ! have_cmd node || ! have_cmd npm; then
+    echo -e "${C_YELLOW}未检测到 Node.js/npm，先自动安装 Node.js 24...${C_RESET}"
+    case "$(os_family)" in
+      debian)
+        curl -fsSL https://deb.nodesource.com/setup_24.x | sudo bash -
+        sudo apt-get update -y
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs build-essential python3 libatomic1
+        ;;
+      rhel)
+        curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -
+        if have_cmd dnf; then
+          sudo dnf -y install nodejs gcc-c++ make python3 libatomic
+        else
+          sudo yum -y install nodejs gcc-c++ make python3 libatomic
+        fi
+        ;;
+      *)
+        echo -e "${C_RED}不支持的系统，请先手动安装 Node.js 后重试${C_RESET}"
+        return 1
+        ;;
+    esac
+  fi
+
+  if [[ "${EUID}" -eq 0 ]]; then
+    npm install -g openclaw@latest
+  else
+    sudo npm install -g openclaw@latest
+  fi
+
+  openclaw onboard --install-daemon
+  sed -i 's|"profile": "messaging"|"profile": "full"|g' ~/.openclaw/openclaw.json 2>/dev/null || true
+  openclaw gateway restart || true
+
+  echo -e "${C_GREEN}✅ OpenClaw 安装完成${C_RESET}"
+  echo "常用命令："
+  echo "  openclaw status"
+  echo "  openclaw gateway status"
+}
+
 app_market_menu(){
   while true; do
     clear
@@ -285,7 +327,16 @@ app_market_menu(){
       5) run_k_app 14; pause ;;
       6) run_k_app 15; pause ;;
       7) run_k_app 112; pause ;;
-      8) run_k_app 114; pause ;;
+      8)
+        echo "1) 一键安装 OpenClaw"
+        echo "2) 打开 OpenClaw 管理菜单(k app 114)"
+        read -r -p "请选择: " oc
+        case "$oc" in
+          1) install_openclaw_quick; pause ;;
+          2) run_k_app 114; pause ;;
+          *) echo "无效输入"; pause ;;
+        esac
+        ;;
       9)
         ensure_nginx_market
         echo -e "${C_GREEN}Nginx 安装/启动完成${C_RESET}"
