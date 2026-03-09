@@ -316,6 +316,132 @@ EOF
   done
 }
 
+system_tools_menu(){
+  while true; do
+    clear
+    echo -e "${C_CYAN}${APP_NAME} - 系统工具${C_RESET}"
+    echo "2) 管理虚拟内存"
+    echo "3) 用户管理"
+    echo "4) 修改 root 密码"
+    echo "5) 修改 SSH 连接端口"
+    echo "6) 查看端口占用"
+    echo "8) 修改时区"
+    echo "11) 管理 hosts 解析"
+    echo "15) 一键换源"
+    echo "102) 删除 z 脚本"
+    echo "0) 返回主菜单"
+    read -r -p "请选择: " c
+
+    case "$c" in
+      2)
+        read -r -p "请输入 swap 大小(MB，0 表示关闭): " swap_mb
+        if [[ "${swap_mb}" == "0" ]]; then
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+          sudo sed -i '/\/swapfile/d' /etc/fstab
+          echo "已关闭并删除 swapfile"
+        else
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+          sudo fallocate -l "${swap_mb}M" /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count="${swap_mb}"
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile >/dev/null
+          sudo swapon /swapfile
+          grep -q '^/swapfile ' /etc/fstab || echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab >/dev/null
+          echo "swap 已设置为 ${swap_mb}MB"
+        fi
+        free -h
+        pause
+        ;;
+      3)
+        echo "1) 创建用户  2) 删除用户  3) 赋予sudo  4) 取消sudo"
+        read -r -p "请选择: " uc
+        case "$uc" in
+          1) read -r -p "用户名: " u; sudo adduser "$u" ;;
+          2) read -r -p "用户名: " u; sudo deluser --remove-home "$u" ;;
+          3) read -r -p "用户名: " u; sudo usermod -aG sudo "$u" 2>/dev/null || sudo usermod -aG wheel "$u" ;;
+          4) read -r -p "用户名: " u; sudo gpasswd -d "$u" sudo 2>/dev/null || sudo gpasswd -d "$u" wheel ;;
+          *) echo "无效输入" ;;
+        esac
+        pause
+        ;;
+      4)
+        echo "将修改 root 密码"
+        sudo passwd root
+        pause
+        ;;
+      5)
+        read -r -p "请输入新的 SSH 端口: " sshp
+        sudo sed -i "s/^#\?Port .*/Port ${sshp}/" /etc/ssh/sshd_config
+        sudo systemctl restart ssh 2>/dev/null || sudo systemctl restart sshd
+        echo "SSH 端口已改为 ${sshp}"
+        pause
+        ;;
+      6)
+        if have_cmd ss; then
+          ss -tulnp
+        else
+          sudo netstat -tulnp
+        fi
+        pause
+        ;;
+      8)
+        echo "1) Asia/Shanghai  2) Asia/Tokyo  3) America/Los_Angeles  4) UTC"
+        read -r -p "请选择: " tz
+        case "$tz" in
+          1) sudo timedatectl set-timezone Asia/Shanghai ;;
+          2) sudo timedatectl set-timezone Asia/Tokyo ;;
+          3) sudo timedatectl set-timezone America/Los_Angeles ;;
+          4) sudo timedatectl set-timezone UTC ;;
+          *) echo "无效输入" ;;
+        esac
+        timedatectl
+        pause
+        ;;
+      11)
+        echo "1) 添加 hosts 解析  2) 删除 hosts 解析"
+        read -r -p "请选择: " hc
+        case "$hc" in
+          1)
+            read -r -p "域名: " h
+            read -r -p "IP: " ip
+            echo "${ip} ${h}" | sudo tee -a /etc/hosts >/dev/null
+            ;;
+          2)
+            read -r -p "要删除的域名关键词: " h
+            sudo sed -i "/[[:space:]]${h}\$/d" /etc/hosts
+            ;;
+          *) echo "无效输入" ;;
+        esac
+        grep -n "hosts" /etc/nsswitch.conf >/dev/null 2>&1 || true
+        tail -n 20 /etc/hosts
+        pause
+        ;;
+      15)
+        bash <(curl -sSL https://linuxmirrors.cn/main.sh)
+        pause
+        ;;
+      102)
+        read -r -p "确认删除 /usr/local/bin/z ？[y/N]: " ans
+        case "${ans:-N}" in
+          y|Y)
+            if [[ "$EUID" -eq 0 ]]; then
+              rm -f /usr/local/bin/z
+            else
+              sudo rm -f /usr/local/bin/z
+            fi
+            echo -e "${C_GREEN}已删除 z 脚本${C_RESET}"
+            ;;
+          *) echo "已取消" ;;
+        esac
+        pause
+        ;;
+      0) break ;;
+      *) echo "无效输入"; pause ;;
+    esac
+  done
+}
+
 ensure_docker(){
   if have_cmd docker; then
     echo -e "${C_GREEN}Docker 已安装${C_RESET}"; return 0
@@ -403,6 +529,7 @@ main(){
     echo "6) Docker管理"
     echo "8) 测试脚本合集"
     echo "11) 应用市场"
+    echo "13) 系统工具"
     echo "0) 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
@@ -413,6 +540,7 @@ main(){
       6) docker_menu ;;
       8) test_scripts_menu ;;
       11) app_market_menu ;;
+      13) system_tools_menu ;;
       0) exit 0 ;;
       *) echo "无效输入"; pause ;;
     esac
