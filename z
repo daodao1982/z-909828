@@ -119,16 +119,16 @@ basic_tools_menu(){
     done
 
     echo "------------------------"
-    echo "1) curl               2) wget"
-    echo "3) sudo               4) socat"
-    echo "5) htop               6) iftop"
-    echo "7) unzip              8) tar"
-    echo "9) tmux              10) ffmpeg"
-    echo "11) btop             12) ranger"
-    echo "13) ncdu             14) fzf"
-    echo "15) vim              16) nano"
-    echo "17) git              18) opencode"
-    echo "0) 返回主菜单"
+    echo "1: curl               2: wget"
+    echo "3: sudo               4: socat"
+    echo "5: htop               6: iftop"
+    echo "7: unzip              8: tar"
+    echo "9: tmux              10: ffmpeg"
+    echo "11: btop             12: ranger"
+    echo "13: ncdu             14: fzf"
+    echo "15: vim              16: nano"
+    echo "17: git              18: opencode"
+    echo "0: 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
@@ -166,31 +166,31 @@ test_scripts_menu(){
     echo -e "${C_CYAN}${APP_NAME} - 测试脚本合集${C_RESET}"
     echo "------------------------"
     echo "IP及解锁状态检测"
-    echo "1) ChatGPT 解锁状态检测"
-    echo "2) Region 流媒体解锁测试"
-    echo "3) yeahwu 流媒体解锁检测"
-    echo "4) xykt IP质量体检脚本"
+    echo "1: ChatGPT 解锁状态检测"
+    echo "2: Region 流媒体解锁测试"
+    echo "3: yeahwu 流媒体解锁检测"
+    echo "4: xykt IP质量体检脚本"
     echo "------------------------"
     echo "网络线路测速"
-    echo "11) besttrace 三网回程延迟路由测试"
-    echo "12) mtr_trace 三网回程线路测试"
-    echo "13) Superspeed 三网测速"
-    echo "14) nxtrace 快速回程测试脚本"
-    echo "15) nxtrace 指定IP回程测试"
-    echo "16) ludashi2020 三网线路测试"
-    echo "17) i-abc 多功能测速脚本"
-    echo "18) NetQuality 网络质量体检脚本"
+    echo "11: besttrace 三网回程延迟路由测试"
+    echo "12: mtr_trace 三网回程线路测试"
+    echo "13: Superspeed 三网测速"
+    echo "14: nxtrace 快速回程测试脚本"
+    echo "15: nxtrace 指定IP回程测试"
+    echo "16: ludashi2020 三网线路测试"
+    echo "17: i-abc 多功能测速脚本"
+    echo "18: NetQuality 网络质量体检脚本"
     echo "------------------------"
     echo "硬件性能测试"
-    echo "21) yabs 性能测试"
-    echo "22) icu/gb5 CPU性能测试脚本"
+    echo "21: yabs 性能测试"
+    echo "22: icu/gb5 CPU性能测试脚本"
     echo "------------------------"
     echo "综合性测试"
-    echo "31) bench 性能测试"
-    echo "32) spiritysdx 融合怪测评"
-    echo "33) nodequality 融合怪测评"
+    echo "31: bench 性能测试"
+    echo "32: spiritysdx 融合怪测评"
+    echo "33: nodequality 融合怪测评"
     echo "------------------------"
-    echo "0) 返回主菜单"
+    echo "0: 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
@@ -343,19 +343,19 @@ app_market_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - 应用市场${C_RESET}"
-    echo "1) 宝塔面板官方版"
-    echo "2) aaPanel 宝塔国际版"
-    echo "3) 1Panel 新一代管理面板"
-    echo "4) 青龙面板定时任务管理平台"
-    echo "5) 简单图床图片管理程序"
-    echo "6) emby 多媒体管理系统"
-    echo "7) Lucky 大内网穿透工具"
-    echo "8) ClawdBot/Moltbot 机器人"
-    echo "9) 仅安装 Nginx"
-    echo "10) 站点重定向"
-    echo "11) 反向代理-IP+端口"
-    echo "12) 反向代理-域名"
-    echo "0) 返回主菜单"
+    echo "1: 宝塔面板官方版"
+    echo "2: aaPanel 宝塔国际版"
+    echo "3: 1Panel 新一代管理面板"
+    echo "4: 青龙面板定时任务管理平台"
+    echo "5: 简单图床图片管理程序"
+    echo "6: emby 多媒体管理系统"
+    echo "7: Lucky 大内网穿透工具"
+    echo "8: ClawdBot/Moltbot 机器人"
+    echo "9: 仅安装 Nginx"
+    echo "10: 站点重定向"
+    echo "11: 反向代理-IP+端口"
+    echo "12: 反向代理-域名"
+    echo "0: 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
@@ -437,16 +437,16 @@ system_tools_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - 系统工具${C_RESET}"
-    echo "2) 管理虚拟内存"
-    echo "3) 用户管理"
-    echo "4) 修改 root 密码"
-    echo "5) 修改 SSH 连接端口"
-    echo "6) 查看端口占用"
-    echo "8) 修改时区"
-    echo "11) 管理 hosts 解析"
-    echo "15) 一键换源"
-    echo "102) 删除 z 脚本"
-    echo "0) 返回主菜单"
+    echo "2: 管理虚拟内存"
+    echo "3: 用户管理"
+    echo "4: 修改 root 密码"
+    echo "5: 修改 SSH 连接端口"
+    echo "6: 查看端口占用"
+    echo "8: 修改时区"
+    echo "11: 管理 hosts 解析"
+    echo "15: 一键换源"
+    echo "102: 删除 z 脚本"
+    echo "0: 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
@@ -471,7 +471,7 @@ system_tools_menu(){
         pause
         ;;
       3)
-        echo "1) 创建用户  2) 删除用户  3) 赋予sudo  4) 取消sudo"
+        echo "1: 创建用户  2: 删除用户  3: 赋予sudo  4: 取消sudo"
         read -r -p "请选择: " uc
         case "$uc" in
           1) read -r -p "用户名: " u; sudo adduser "$u" ;;
@@ -503,7 +503,7 @@ system_tools_menu(){
         pause
         ;;
       8)
-        echo "1) Asia/Shanghai  2) Asia/Tokyo  3) America/Los_Angeles  4) UTC"
+        echo "1: Asia/Shanghai  2: Asia/Tokyo  3: America/Los_Angeles  4: UTC"
         read -r -p "请选择: " tz
         case "$tz" in
           1) sudo timedatectl set-timezone Asia/Shanghai ;;
@@ -516,7 +516,7 @@ system_tools_menu(){
         pause
         ;;
       11)
-        echo "1) 添加 hosts 解析  2) 删除 hosts 解析"
+        echo "1: 添加 hosts 解析  2: 删除 hosts 解析"
         read -r -p "请选择: " hc
         case "$hc" in
           1)
@@ -612,13 +612,13 @@ docker_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - Docker管理${C_RESET}"
-    echo "1) 安装/更新 Docker"
-    echo "2) 查看 Docker 全局状态"
-    echo "3) 列出容器"
-    echo "4) 查看容器日志"
-    echo "5) 重启容器"
-    echo "6) 启停容器"
-    echo "0) 返回主菜单"
+    echo "1: 安装/更新 Docker"
+    echo "2: 查看 Docker 全局状态"
+    echo "3: 列出容器"
+    echo "4: 查看容器日志"
+    echo "5: 重启容器"
+    echo "6: 启停容器"
+    echo "0: 返回主菜单"
     read -r -p "请选择: " c
     case "$c" in
       1) ensure_docker; pause ;;
@@ -639,15 +639,15 @@ main(){
     echo -e "${C_CYAN}╔══════════════════════════════════════╗${C_RESET}"
     echo -e "${C_CYAN}║  ${APP_NAME} v${APP_VER} (${APP_CMD})${C_CYAN}            ║${C_RESET}"
     echo -e "${C_CYAN}╚══════════════════════════════════════╝${C_RESET}"
-    echo "00) 脚本更新"
-    echo "1) 系统信息查询"
-    echo "2) 系统更新"
-    echo "4) 基础工具（前18项）"
-    echo "6) Docker管理"
-    echo "8) 测试脚本合集"
-    echo "11) 应用市场（含 1/2/3/12/14/15/112/114）"
-    echo "13) 系统工具"
-    echo "0) 退出"
+    echo "00: 脚本更新"
+    echo "1: 系统信息查询"
+    echo "2: 系统更新"
+    echo "4: 基础工具（前18项）"
+    echo "6: Docker管理"
+    echo "8: 测试脚本合集"
+    echo "11: 应用市场（含 1/2/3/12/14/15/112/114）"
+    echo "13: 系统工具"
+    echo "0: 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
       00) update_script; pause ;;
