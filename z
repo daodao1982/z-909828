@@ -304,14 +304,13 @@ openclaw_manage_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - OpenClaw 管理${C_RESET}"
-    echo "1) 安装 OpenClaw"
-    echo "2) 启动 gateway"
-    echo "3) 停止 gateway"
-    echo "4) 查看状态"
-    echo "5) 查看日志"
-    echo "6) 卸载 OpenClaw（双重确认）"
-    echo "7) 进入 k app 114 完整菜单"
-    echo "0) 返回应用市场"
+    echo "1: 安装 OpenClaw"
+    echo "2: 启动"
+    echo "3: 停止"
+    echo "4: 查看状态"
+    echo "5: 查看日志"
+    echo "6: 卸载 OpenClaw"
+    echo "0: 返回应用市场"
     read -r -p "请选择: " oc
 
     case "$oc" in
@@ -334,7 +333,6 @@ openclaw_manage_menu(){
         fi
         pause
         ;;
-      7) run_k_app 114; pause ;;
       0) break ;;
       *) echo "无效输入"; pause ;;
     esac
