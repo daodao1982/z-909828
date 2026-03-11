@@ -437,20 +437,20 @@ system_tools_menu(){
   while true; do
     clear
     echo -e "${C_CYAN}${APP_NAME} - 系统工具${C_RESET}"
-    echo " 2: 管理虚拟内存"
-    echo " 3: 用户管理"
-    echo " 4: 修改 root 密码"
-    echo " 5: 修改 SSH 连接端口"
-    echo " 6: 查看端口占用"
-    echo " 8: 修改时区"
-    echo "11: 管理 hosts 解析"
-    echo "15: 一键换源"
-    echo "102: 删除 z 脚本"
+    echo " 1: 管理虚拟内存"
+    echo " 2: 用户管理"
+    echo " 3: 修改 root 密码"
+    echo " 4: 修改 SSH 连接端口"
+    echo " 5: 查看端口占用"
+    echo " 6: 修改时区"
+    echo " 7: 管理 hosts 解析"
+    echo " 8: 一键换源"
+    echo " 9: 删除 z 脚本"
     echo " 0: 返回主菜单"
     read -r -p "请选择: " c
 
     case "$c" in
-      2)
+      1)
         read -r -p "请输入 swap 大小(MB，0 表示关闭): " swap_mb
         if [[ "${swap_mb}" == "0" ]]; then
           sudo swapoff -a || true
@@ -470,7 +470,7 @@ system_tools_menu(){
         free -h
         pause
         ;;
-      3)
+      2)
         echo " 1: 创建用户  2: 删除用户  3: 赋予sudo  4: 取消sudo"
         read -r -p "请选择: " uc
         case "$uc" in
@@ -482,19 +482,19 @@ system_tools_menu(){
         esac
         pause
         ;;
-      4)
+      3)
         echo "将修改 root 密码"
         sudo passwd root
         pause
         ;;
-      5)
+      4)
         read -r -p "请输入新的 SSH 端口: " sshp
         sudo sed -i "s/^#\?Port .*/Port ${sshp}/" /etc/ssh/sshd_config
         sudo systemctl restart ssh 2>/dev/null || sudo systemctl restart sshd
         echo "SSH 端口已改为 ${sshp}"
         pause
         ;;
-      6)
+      5)
         if have_cmd ss; then
           ss -tulnp
         else
@@ -502,7 +502,7 @@ system_tools_menu(){
         fi
         pause
         ;;
-      8)
+      6)
         echo " 1: Asia/Shanghai  2: Asia/Tokyo  3: America/Los_Angeles  4: UTC"
         read -r -p "请选择: " tz
         case "$tz" in
@@ -515,7 +515,7 @@ system_tools_menu(){
         timedatectl
         pause
         ;;
-      11)
+      7)
         echo " 1: 添加 hosts 解析  2: 删除 hosts 解析"
         read -r -p "请选择: " hc
         case "$hc" in
@@ -534,11 +534,11 @@ system_tools_menu(){
         tail -n 20 /etc/hosts
         pause
         ;;
-      15)
+      8)
         bash <(curl -sSL https://linuxmirrors.cn/main.sh)
         pause
         ;;
-      102)
+      9)
         read -r -p "确认删除 /usr/local/bin/z ？[y/N]: " ans
         case "${ans:-N}" in
           y|Y)
