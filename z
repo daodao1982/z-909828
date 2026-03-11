@@ -642,22 +642,22 @@ main(){
     echo "00: 脚本更新"
     echo " 1: 系统信息查询"
     echo " 2: 系统更新"
-    echo " 4: 基础工具（前18项）"
-    echo " 6: Docker管理"
-    echo " 8: 测试脚本合集"
-    echo "11: 应用市场（含 1/2/3/12/14/15/112/114）"
-    echo "13: 系统工具"
+    echo " 3: 基础工具 前18项"
+    echo " 4: Docker管理"
+    echo " 5: 测试脚本合集"
+    echo " 6: 应用市场 含 1/2/3/12/14/15/112/114"
+    echo " 7: 系统工具"
     echo " 0: 退出"
     read -r -p "请输入你的选择: " choice
     case "$choice" in
       00) update_script; pause ;;
       1) show_system_info; pause ;;
       2) pm_update; pause ;;
-      4) basic_tools_menu ;;
-      6) docker_menu ;;
-      8) test_scripts_menu ;;
-      11) app_market_menu ;;
-      13) system_tools_menu ;;
+      3) basic_tools_menu ;;
+      4) docker_menu ;;
+      5) test_scripts_menu ;;
+      6) app_market_menu ;;
+      7) system_tools_menu ;;
       0) exit 0 ;;
       *) echo "无效输入"; pause ;;
     esac
